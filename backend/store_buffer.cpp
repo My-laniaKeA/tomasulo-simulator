@@ -34,6 +34,10 @@ void StoreBuffer::push(unsigned addr, unsigned value) {
  * @return StoreBufferSlot 弹出的StoreBuffer项目
  */
 StoreBufferSlot StoreBuffer::pop() {
+	if (!buffer[popPtr].valid) {
+		Logger::Error("StoreBuffer::pop: Store Buffer empty!");
+        std::__throw_runtime_error("Store Buffer empty when pop!");
+	}
     auto ret = buffer[popPtr];
     Logger::Info("Store buffer pop:");
     Logger::Info("Index: %u", popPtr);
@@ -68,7 +72,7 @@ std::optional<unsigned> StoreBuffer::query(unsigned addr) {
     if (pushPtr == 0) {
         p += ROB_SIZE;
     }
-    while (p != popPtr) {
+    do {
         if (buffer[p].valid &&
             (buffer[p].storeAddress & 0xFFFFFFFCu) == (addr & 0xFFFFFFFCu)) {
             return std::make_optional(buffer[p].storeData);
@@ -77,6 +81,6 @@ std::optional<unsigned> StoreBuffer::query(unsigned addr) {
             p += ROB_SIZE;
         }
         p--;
-    }
+    } while (p != popPtr);
     return std::nullopt;
 }
