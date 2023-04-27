@@ -49,7 +49,7 @@ std::optional<ROBStatusWritePort> ExecutePipeline::step(unsigned *dataMem,
 
     std::stringstream ss;
     ss << executeSlot.inst;
-	Logger::setInfoOutput(true);
+	// Logger::setInfoOutput(true);
     Logger::Info("Execute pipeline %s:", name.c_str());
     Logger::Info("Running %s", ss.str().c_str());
     Logger::Info("ROB Index: %u", executeSlot.robIdx);

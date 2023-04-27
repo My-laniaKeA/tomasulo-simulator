@@ -29,8 +29,8 @@ bool Processor::step() {
         if (!backend.dispatchInstruction(newInst.value())) {
 			std::stringstream ss;
             ss << newInst.value();
-			Logger::setDebugOutput(true);
-			Logger::Debug("Instruction %s halted by backend", ss.str().c_str());
+			// Logger::setDebugOutput(true);
+			// Logger::Debug("Instruction %s halted by backend", ss.str().c_str());
             frontend.haltDispatch();
 			// exit(0);
 		}

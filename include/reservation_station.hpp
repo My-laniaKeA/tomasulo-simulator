@@ -52,7 +52,7 @@ void ReservationStation<size>::insertInstruction(
         // TODO: Dispatch instruction to this slot
 		std::stringstream ss;
 		ss << inst;
-		Logger::setDebugOutput(true);
+		// Logger::setDebugOutput(true);
 		slot.inst = inst;
     	slot.robIdx = robIdx;
     	slot.busy = true;
@@ -115,7 +115,7 @@ void ReservationStation<size>::wakeup(
     [[maybe_unused]] const ROBStatusWritePort &x) {
     // TODO: Wakeup instructions according to ROB Write
 	std::stringstream ss;
-	Logger::setDebugOutput(true);	
+	// Logger::setDebugOutput(true);	
 	for (auto &slot : buffer) {
 		if (slot.busy) {
 			if (slot.readPort1.waitForWakeup 
@@ -159,7 +159,7 @@ IssueSlot ReservationStation<size>::issue() {
 			slot.busy = false;
 			std::stringstream ss;
             ss << slot.inst;
-			Logger::setDebugOutput(true);
+			// Logger::setDebugOutput(true);
 			// Logger::Debug("RS::issue %s", ss.str().c_str());
 			return result;
 		}
@@ -179,7 +179,7 @@ void ReservationStation<size>::flush() {
 template <unsigned size>
 void ReservationStation<size>::showContent() {
 	std::stringstream ss;
-	Logger::setDebugOutput(true);
+	// Logger::setDebugOutput(true);
 	Logger::Debug("Instructions in Reservation Station: ");
     for (auto &slot : buffer) {
         ss << slot.inst << "\n";
