@@ -1,7 +1,11 @@
 #include "processor.h"
+#include "branch_predict_model.h"
 
 // Optional TODO: Change here to implement predictions
 class FrontendWithPredict : public Frontend {
+private:
+	BranchPredictUnit bpu;
+
 protected:
     BranchPredictBundle bpuFrontendUpdate(unsigned int pc) override;
 

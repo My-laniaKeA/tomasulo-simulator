@@ -22,3 +22,5 @@ enum class FUType {
 };
 
 constexpr int ROB_SIZE = 16;
+
+constexpr int BPU_SIZE = 32;
