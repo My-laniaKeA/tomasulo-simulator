@@ -55,6 +55,16 @@ bool Backend::step(Frontend &frontend) {
 
     auto commit = rob.getFront();
 
+	// std::stringstream ss;
+	// Logger::setDebugOutput(true);
+	// if (commit.has_value()) {	
+	// 	ss << commit.value().inst;
+	// 	Logger::Debug("ROB front is %s", ss.str().c_str());
+	// }
+	// else {
+	// 	Logger::Debug("Empty ROB, can not commit.");
+	// }
+
     bool executeExit = false;
 
     if (commit.has_value() && commit.value().state.ready) {
@@ -95,6 +105,16 @@ void Backend::flush() {
  */
 unsigned Backend::read(unsigned addr) const {
     return data[(addr - 0x80400000) >> 2];
+}
+
+/**
+ * @brief 用于将数据写入数据内存
+ *
+ * @param addr 大于等于0x80400000的地址
+ * @param value 需要写入的数据
+ */
+void Backend::write(unsigned addr, unsigned value) {
+    data[(addr - 0x80400000) >> 2] = value;
 }
 
 void Backend::attachRegFile(const std::shared_ptr<RegisterFile> &regFile) {

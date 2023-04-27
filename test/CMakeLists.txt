@@ -8,7 +8,7 @@ SET(CMAKE_CXX_COMPILER_WORKS TRUE)
 if (JUDGE_ONLINE STREQUAL "true")
     SET(TOOLCHAIN_PREFIX "riscv64-unknown-elf") # !! DO NOT CHANGE THIS LINE !!
 else()
-    SET(TOOLCHAIN_PREFIX "riscv64-unknown-elf") # NOTE: change this line if you use other toolchains
+    SET(TOOLCHAIN_PREFIX "riscv64-linux-gnu") # NOTE: change this line if you use other toolchains
 endif()
 
 SET(CMAKE_C_COMPILER "${TOOLCHAIN_PREFIX}-gcc")

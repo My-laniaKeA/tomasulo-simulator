@@ -22,8 +22,18 @@ bool Processor::step() {
     bool finish = backend.step(frontend);
     auto newInst = frontend.step();
     if (newInst.has_value()) {
-        if (!backend.dispatchInstruction(newInst.value()))
+		// std::stringstream ss;
+		// ss << newInst.value();
+		// Logger::setDebugOutput(true);
+		// Logger::Debug("Instruction is %s", ss.str().c_str());
+        if (!backend.dispatchInstruction(newInst.value())) {
+			std::stringstream ss;
+            ss << newInst.value();
+			Logger::setDebugOutput(true);
+			Logger::Debug("Instruction %s halted by backend", ss.str().c_str());
             frontend.haltDispatch();
+			// exit(0);
+		}
         else {
             std::stringstream ss;
             ss << newInst.value();

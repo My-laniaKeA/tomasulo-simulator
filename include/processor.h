@@ -64,6 +64,7 @@ public:
     bool dispatchInstruction(const Instruction &inst);
     bool step(Frontend &frontend);
     unsigned read(unsigned addr) const;
+	void write(unsigned addr, unsigned value);
     bool commitInstruction(const ROBEntry &inst, Frontend &frontend);
     void attachRegFile(const std::shared_ptr<RegisterFile> &regFile);
 };
