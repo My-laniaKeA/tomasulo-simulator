@@ -4,7 +4,12 @@
 BranchPredictUnit::BranchPredictUnit() {
 	for (auto &e: table) {
 		e.valid = false;
+		e.counterState = CounterState::STRONG_NOT_TAKEN;
 	}
+}
+
+BranchPredictEntry BranchPredictUnit::query(unsigned addr) const {
+	return table[(addr & 0x7C) >> 2];
 }
 
 /**
@@ -15,12 +20,19 @@ BranchPredictUnit::BranchPredictUnit() {
  */
 std::optional<BranchPredictBundle> BranchPredictUnit::getPred(unsigned instAddr) const{
 	BranchPredictBundle ret;
-	auto entry = table[instAddr % BPU_SIZE];
+	auto entry = table[(instAddr & 0x7C) >> 2];
+	// Logger::Info("getPred(): valid: %d, candidate inst: %x, candidate target: %x, candidate state: %d",
+		// entry.valid, entry.instAddr, entry.targetAddr, entry.counterState);
 	if (entry.valid && entry.instAddr == instAddr) {
-		ret.predictJump = 
-			(entry.counterState == CounterState::WEAK_TAKEN ||
-			 entry.counterState == CounterState::STRONG_TAKEN);
-		ret.predictTarget = entry.targetAddr;
+		if (entry.counterState == CounterState::WEAK_TAKEN ||
+			 entry.counterState == CounterState::STRONG_TAKEN) {
+			ret.predictJump = true;
+			ret.predictTarget = entry.targetAddr;
+		}
+		else {
+			ret.predictJump = false;
+			ret.predictTarget = instAddr + 4;
+		}
 		return std::make_optional(ret);
 	}	
 	return std::nullopt;
@@ -34,17 +46,19 @@ std::optional<BranchPredictBundle> BranchPredictUnit::getPred(unsigned instAddr)
  * @param bool taken 是否跳转
  */
 void BranchPredictUnit::update(unsigned instAddr, unsigned targetAddr, bool taken) {
-	auto entry = table[instAddr % BPU_SIZE];
-	entry.valid = true;
+	int idx = (instAddr & 0x7C) >> 2;
+	table[idx].valid = true;
+	table[idx].instAddr = instAddr;
+	table[idx].targetAddr = targetAddr;
 	if (taken) {
-		switch (entry.counterState) {
+		switch (table[idx].counterState) {
 		case CounterState::STRONG_NOT_TAKEN:
-			entry.counterState = CounterState::WEAK_NOT_TAKEN;
+			table[idx].counterState = CounterState::WEAK_NOT_TAKEN;
 			break;
 		case CounterState::WEAK_NOT_TAKEN:
 		case CounterState::WEAK_TAKEN:
 		case CounterState::STRONG_TAKEN:
-			entry.counterState = CounterState::STRONG_TAKEN;
+			table[idx].counterState = CounterState::STRONG_TAKEN;
 			break;
 		default:
 			Logger::Error("Unknown CounterState!");
@@ -53,15 +67,15 @@ void BranchPredictUnit::update(unsigned instAddr, unsigned targetAddr, bool take
 		}
 	}
 	else {
-		switch (entry.counterState)
+		switch (table[idx].counterState)
 		{
 		case CounterState::STRONG_NOT_TAKEN:
 		case CounterState::WEAK_NOT_TAKEN:
 		case CounterState::WEAK_TAKEN:
-			entry.counterState = CounterState::STRONG_NOT_TAKEN;
+			table[idx].counterState = CounterState::STRONG_NOT_TAKEN;
 			break;
 		case CounterState::STRONG_TAKEN:
-			entry.counterState =  CounterState::WEAK_TAKEN;
+			table[idx].counterState =  CounterState::WEAK_TAKEN;
 			break;
 		default:
 			Logger::Error("Unknown CounterState!");
@@ -69,4 +83,7 @@ void BranchPredictUnit::update(unsigned instAddr, unsigned targetAddr, bool take
 			break;
 		}
 	}
+
+	// Logger::Info("update(): taken: %d, valid: %d, inst: %x, target: %x, state: %d", taken,
+	// 	table[idx].valid, table[idx].instAddr, table[idx].targetAddr, table[idx].counterState);
 }

@@ -107,12 +107,9 @@ bool Backend::commitInstruction([[maybe_unused]] const ROBEntry &entry,
 	// NOTE: Be careful about flush!
 	std::stringstream ss;
     ss << entry.inst;
-	Logger::Debug("Commit entry %d: %s.", rob.getPopPtr(), ss.str().c_str());
-
-	// if (entry.inst == EXTRA::EXIT){
-	// 	return true;
-	// }
-
+	Logger::Debug("Commit %s at pc = %x", ss.str().c_str(), entry.inst.pc);
+	// Logger::Debug("Commit entry %d: %s.", rob.getPopPtr(), ss.str().c_str());
+	
 	if (!entry.state.ready) {
 		Logger::Error("Can not commit unready instruction");
     	std::__throw_runtime_error("Can not commit unready instruction");
@@ -122,6 +119,12 @@ bool Backend::commitInstruction([[maybe_unused]] const ROBEntry &entry,
 		return true;
 	}
 	
+	BpuUpdateData updateData;
+	updateData.branchTaken = entry.state.actualTaken;
+	updateData.isBranch = (entry.inst.type == InstructionType::B);
+	updateData.jumpTarget = entry.state.jumpTarget;
+	updateData.pc = entry.inst.pc;
+
 	if (entry.state.mispredict) {
 		Logger::Debug("Ready to jump!");
 		if (entry.inst == RV32I::JAL || entry.inst == RV32I::JALR) {
@@ -133,7 +136,12 @@ bool Backend::commitInstruction([[maybe_unused]] const ROBEntry &entry,
 			regFile->write(entry.inst.getRd(), entry.state.result, rob.getPopPtr());
 			Logger::Debug("Return addr = %x, Param a0 = %d", regFile->read(1), regFile->read(10));
 		}
-		frontend.jump(entry.state.jumpTarget);
+		if (entry.inst.type == InstructionType::B)
+			frontend.bpuBackendUpdate(updateData);
+		if (entry.state.actualTaken)
+			frontend.jump(entry.state.jumpTarget);
+		else
+			frontend.jump(entry.inst.pc + 4);
 		flush();
 		return false;
 		// rob.flush();
@@ -150,8 +158,9 @@ bool Backend::commitInstruction([[maybe_unused]] const ROBEntry &entry,
 			unsigned rd = entry.inst.getRd();
 			regFile->write(rd, entry.state.result, rob.getPopPtr());
 			rob.pop();
-			if (entry.inst.type != InstructionType::B)
-				Logger::Debug("Reg[%d] := %d = 0x%x", rd, entry.state.result, entry.state.result);
+			if (entry.inst.type == InstructionType::B)
+				frontend.bpuBackendUpdate(updateData);
+			// 	Logger::Debug("Reg[%d] := %d = 0x%x", rd, entry.state.result, entry.state.result);
 			break;
 		}
 		case FUType::LSU:
@@ -160,13 +169,13 @@ bool Backend::commitInstruction([[maybe_unused]] const ROBEntry &entry,
 				entry.inst == RV32I::LW || entry.inst == RV32I::LBU) { // Load 
 				unsigned rd = entry.inst.getRd();
 				regFile->write(rd, entry.state.result, rob.getPopPtr());
-				Logger::Debug("Reg[%d] := %d = 0x%x", rd, entry.state.result, entry.state.result);
+				// Logger::Debug("Reg[%d] := %d = 0x%x", rd, entry.state.result, entry.state.result);
 				rob.pop();
 			}
 			else if (entry.inst == RV32I::SB || entry.inst == RV32I::SH || entry.inst == RV32I::SW) { // Store
 				StoreBufferSlot result = storeBuffer.pop();
 				write(result.storeAddress, result.storeData);
-				Logger::Debug("Mem[%x] := %d", result.storeAddress, result.storeData);
+				// Logger::Debug("Mem[%x] := %d", result.storeAddress, result.storeData);
 				rob.pop();
 			}
 			else {

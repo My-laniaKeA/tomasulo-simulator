@@ -52,11 +52,9 @@ void ReservationStation<size>::insertInstruction(
         // TODO: Dispatch instruction to this slot
 		std::stringstream ss;
 		ss << inst;
-		// Logger::setDebugOutput(true);
 		slot.inst = inst;
     	slot.robIdx = robIdx;
     	slot.busy = true;
-		// Logger::Debug("RS::insertInstruction %s, robIdx = %d", ss.str().c_str(), robIdx);
 		unsigned rs1 = inst.getRs1();
 		unsigned robIdx1 = regFile->getBusyIndex(rs1);
 		if (regFile->isBusy(rs1)) {
@@ -70,8 +68,6 @@ void ReservationStation<size>::insertInstruction(
 				slot.readPort1.robIdx = robIdx1;
 				slot.readPort1.value = 0;
 			}		
-			// Logger::Debug("slot.readPort1.robIdx = %d", slot.readPort1.robIdx );
-			// Logger::Debug("ROB[slot.readPort1.robIdx].ready = %d", reorderBuffer.checkReady(slot.readPort1.robIdx));
 		}
 		else {
 			slot.readPort1.waitForWakeup = false;

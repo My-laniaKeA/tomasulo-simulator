@@ -35,6 +35,7 @@ class BranchPredictUnit {
 
 public:
 	BranchPredictUnit();
+	BranchPredictEntry query(unsigned addr) const;
 	std::optional<BranchPredictBundle> getPred(unsigned instAddr) const;
 	void update(unsigned instAddr, unsigned targetAddr, bool taken);
 };
