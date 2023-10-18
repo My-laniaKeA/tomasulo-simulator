@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: riscv64:alpha
+    container: riscv64:ubuntu
 
     steps:
     - name: Checkout code
