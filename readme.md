@@ -84,6 +84,8 @@ Please do not modify any files that are not marked with `TODO:`, this may cause 
 
 ## About Gitlab CI **(Important!)**
 
+> Due to resource limitations, the GitLab CI/CD has not been migrated to GitHub Actions.
+
 Normally, when you execute `git push` to push your local repository to the remote end, gitlab will add your evaluation task to the execution queue.
 
 To ensure the normal operation of `Gitlab CI`, **please do not modify `.gitlab-ci.yml`, please do not modify `.gitlab-ci.yml`, please do not modify `.gitlab-ci.yml`.**
